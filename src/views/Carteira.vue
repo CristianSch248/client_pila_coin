@@ -1,88 +1,72 @@
 <template>
     <div class="container">
-        <div class="row">
-            <div class="col text-left"> <h1>Minha carteira PilaCoin</h1> </div>
-            <div class="col">
-                <div class="col-4 mx-auto text-rigth">
-                    <button 
-                        v-on:click="goToDashboard" 
-                        type="submit" 
-                        class="btn btn-primary btn-block mb-4 w-75">
-                            Voltar 
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-sm">
-                <div v-if="pilas" class="text-left">
-                    <h3> Pila: </h3>
-                    <ul class="text-left">
-                        <li><strong>Nome do criador:</strong> {{ pilas.nomeCriador }}</li>
-                        <li><strong>Chave pública:</strong> {{ pilas.chaveCriador }}</li>
-                        <li><strong>Nonce:</strong> {{ pilas.nonce }}</li>
-                        <li><strong>Data de criação:</strong> {{ pilas.dataCriacao }}</li>
-                    </ul>
+        <div class="card" id="conteudo">
+            <div class="row">
+                <div class="col text-left"> 
+                    <div id="title">
+                        <h1>Minha carteira PilaCoin</h1> 
+                    </div>
                 </div>
 
-                <div v-if="difficulty" class="text-left">
-                    <h3>Dificuldade: </h3>
-                    <ul class="text-left">
-                        <li><strong>Dificuldade: </strong> {{ difficulty.dificuldade }}</li>
-                        <li><strong>Start:</strong> {{ difficulty.inicio }}</li>
-                        <li><strong>Válido até: </strong> {{ difficulty.validadeFinal }}</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="col-sm">
-                <div>
-                    <button 
-                        v-on:click="btnTrasnferir" 
-                        type="submit" 
-                        class="btn btn-primary btn-block mb-4 mt-4 w-50">
-                            Transeferir pilas
-                    </button>
-                </div>
-
-                <div v-if="blocos" class="text-left">
-                    <h3> Bloco: </h3>
-                    <ul class="text-left">
-                        <li><strong>Minerador: </strong> {{ blocos.nomeUsuarioMinerador }}</li>
-                        <li><strong>Chave pública do minerador:</strong> {{ blocos.chaveUsuarioMinerador }}</li>
-                        <li><strong>Nonce:</strong> {{ blocos.nonce }}</li>
-                        <li><strong>Id do bloco: </strong> {{ blocos.numeroBloco }}</li>
-                        <li><strong>Bloco anterior: </strong> {{ blocos.nonceBlocoAnterior }}</li>
-                    </ul>
+                <div class="col">
+                    <div id="btn" class="col-4 mx-auto text-rigth">
+                        <button 
+                            v-on:click="goToDashboard" 
+                            type="submit" 
+                            class="btn btn-primary btn-block mb-4 w-75">
+                                Voltar 
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div>
-            <h3> Transações: </h3>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Remetente </th>
-                        <th>Destinatario </th>
-                        <th>Assinatura</th>
-                        <th>Nonce</th>
-                        <th>Data tranferência</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="transferencia in this.transferencias" :key="transferencia.id">
-                        <td> {{ transferencia.chaveUsuarioOrigem }} </td>
-                        <td> {{ transferencia.chaveUsuarioDestino }} </td>
-                        <td> {{ transferencia.assinatura }} </td>
-                        <td> {{ transferencia.noncePila }} </td>
-                        <td> {{ transferencia.dataTransacao }} </td>
-                        <td> {{ transferencia.status }} </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div id="tabelas">
+                <h3> Pilas: </h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th> Nome criador </th>
+                            <th> Chave criador </th>
+                            <th> Nonce </th>
+                            <th> Data criação </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="pila in this.pilas" :key="pila.id">
+                            <td> {{ pila.nomeCriador }} </td>
+                            <td class="texto-longo"> {{ pila.chaveCriador }} </td>
+                            <td class="texto-longo"> {{ pila.nonce }} </td>
+                            <td> {{ pila.dataCriacao }} </td>
+                        </tr>
+                    </tbody>
+                </table>               
+            </div>
+        </div>
+
+        <div>
+            <div id="tabelas">
+                <h3> Blocos: </h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th> Nome Minerador </th>
+                            <th> Chave Minerador </th>
+                            <th> Nonce bloco </th>
+                            <th> Numero do bloco </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="bloco in this.blocos" :key="bloco.id">
+                            <td> {{ bloco.nomeUsuarioMinerador }} </td>
+                            <td class="texto-longo"> {{ bloco.chaveUsuarioMinerador }} </td>
+                            <td class="texto-longo"> {{ bloco.nonce }} </td>
+                            <td> {{ bloco.numeroBloco }} </td>
+                        </tr>
+                    </tbody>
+                </table>  
+            </div>
         </div>
     </div>
 </template>
@@ -98,10 +82,15 @@ export default {
     },
     data(){
         return{
-            pilas: null,
-            blocos: null,
+            pilas: [],
+            blocos: [],
             transferencias: [],
-            difficulty: null
+            difficulty: null,
+            blocoSelecionado: null,
+
+            
+
+            isModalVisible: false,
         }
     },
     created(){
@@ -115,25 +104,27 @@ export default {
             await axios.get(route('pilaCoin'))
             .then(response => {
                 this.pilas = response.data
+                //console.log("🚀 ~ file: Carteira.vue:118 ~ getPilas ~ this.pilas:", this.pilas)
             }).catch(error => {
-                console.log("🚀 ~ file: Carteira.vue:120 ~ getPilas ~ error:", error)
+                console.log("getPilas ~ error:", error)
             })
         },
         async getBlocos(){
             await axios.get(route('bloco'))
             .then(response => {
                 this.blocos = response.data
-                this.transferencias = this.blocos.transacoes
+                //console.log("🚀 ~ file: Carteira.vue:122 ~ getBlocos ~ blocos:", this.blocos)
             }).catch(error => {
-                console.log("🚀 ~ file: Carteira.vue:127 ~ axios.get ~ error:", error)
+                console.log("getBlocos ~ error:", error)
             })
         },
         async getdifficulty(){
             await axios.get(route('dificuldade'))
             .then(response => {
                 this.difficulty = response.data
+                console.log("🚀 ~ file: Carteira.vue:135 ~ getdifficulty ~ this.difficulty:", this.difficulty)
             }).catch(error => {
-                console.log("🚀 ~ file: Carteira.vue:139 ~ getdifficulty ~ error:", error)
+                console.log("getdifficulty ~ error:", error)
             })
         },
         goToDashboard(){
@@ -141,14 +132,37 @@ export default {
         },
         btnTrasnferir(){        
             this.$router.push('/trasferir')
-        }
+        },
     }
 }
 </script>
 
 <style>
-.content{
-    display: inline-block; 
-    margin-right: 20px;
-}
+    .content {
+        display: inline-block; 
+        margin-right: 20px;
+    }
+    #tabelas {
+        max-height: 330px; 
+        overflow-y: auto;
+
+        padding: 10px;
+        margin: 20px;
+        border: none;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #btn {
+        margin: 20px 20px 10px 10px;
+    }
+
+    #title {
+        margin: 20px 20px 10px 10px;
+    }
+
+    .texto-longo {
+        max-width: 200px; 
+        overflow: hidden;
+        text-overflow: ellipsis; /* Adiciona reticências (...) se o texto ultrapassar o tamanho máximo */
+    }
 </style>

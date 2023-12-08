@@ -3,8 +3,6 @@
     <h1>Dashboard</h1>
     <div class="col-4 mx-auto text-center">
 
-      <button v-on:click="btnLogs" type="submit" class="btn btn-primary btn-block mb-4">Logs do servidor</button>
-
       <button v-on:click="btnCarteira" type="submit" class="btn btn-primary btn-block mb-4">Minha carteira</button>
 
       <button v-on:click="btnTrasnferir" type="submit" class="btn btn-primary btn-block mb-4">Transeferir pilas</button>
